@@ -19,8 +19,9 @@ do
 
 	git checkout -q $SHA
 	SCT_DOWN_PATH=$(find ./ -name sct_download_data.py)
-	COMMIT_MSG_TITLE=$(git log -1 --pretty="[%cd]: %s" --date short)
+	COMMIT_MSG_TITLE=$(git log -1 --pretty="%cd: %s" --date short)
 	COMMIT_MSG_BODY=$(git log -1 --pretty="Data retrieved automatically from download urls in https://github.com/neuropoly/spinalcordtoolbox/commit/%h/${SCT_DOWN_PATH}")
+	TAG=$($WS_PATH/batch_tag.sh $(git log -1 --pretty="%cd" --date short))
 
 	# create url diff lists
 	$WS_PATH/urls_diff.py $SCT_PATH/$SCT_DOWN_PATH $WS_PATH/tmp
@@ -46,5 +47,9 @@ do
 	git commit -am "${COMMIT_MSG_TITLE}
 
 	${COMMIT_MSG_BODY}"
+	if [ $? == 0 ];
+	then
+		git tag $TAG
+	fi
 	cd $SCT_PATH
 done < $WS_PATH/sha_list_r.txt
