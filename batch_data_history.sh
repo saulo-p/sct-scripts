@@ -15,10 +15,12 @@ tac $WS_PATH/sha_list.txt > $WS_PATH/sha_list_r.txt
 rm $WS_PATH/tmp/*
 while read SHA;
 do
-	echo "commit: $SHA"
+	echo "Commit: $SHA"
 
 	git checkout -q $SHA
 	SCT_DOWN_PATH=$(find ./ -name sct_download_data.py)
+	COMMIT_MSG_TITLE=$(git log -1 --pretty="[%cd]: %s" --date short)
+	COMMIT_MSG_BODY=$(git log -1 --pretty="Data retrieved automatically from download urls in https://github.com/neuropoly/spinalcordtoolbox/commit/%h/${SCT_DOWN_PATH}")
 
 	# create url diff lists
 	$WS_PATH/urls_diff.py $SCT_PATH/$SCT_DOWN_PATH $WS_PATH/tmp
@@ -41,8 +43,8 @@ do
 	# Git actions
 	cd $REPO_PATH
 	git add --all
-	git commit -am "SCT-data from commit ${SHA}
+	git commit -am "${COMMIT_MSG_TITLE}
 
-	Data retrieved automatically from download links in spinalcordtoolbox:${SHA}"
+	${COMMIT_MSG_BODY}"
 	cd $SCT_PATH
 done < $WS_PATH/sha_list_r.txt
