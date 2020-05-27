@@ -19,23 +19,37 @@ from ws_download_data import install_data
 
 import pickle
 
-def main(data_name, dest_folder, unzip=True):
-    with open('/home/saulo/Work/exmakhina/poly/workspace/tmp/urls.pickle', 'rb') as fin:
+def main(key_name, dest_folder, url_dict_dir, unzip=True):
+    with open(os.path.join(url_dict_dir,'urls.pickle'), 'rb') as fin:
         dict_url = pickle.load(fin)
 
-    url = dict_url[data_name]
+    url = dict_url[key_name]
     install_data(url, dest_folder, unzip)
 
     return 0
 
 
 if __name__ == "__main__":
-    data_name = sys.argv[1]
-    dest_folder = sys.argv[2]
+    args = iter(sys.argv[1:])
 
-    if sys.argv[3] == 'z':
-        res=main(data_name, dest_folder, False)
+    # mandatory arguments
+    try:
+        key_name = next(args)
+        dest_folder = next(args)
+        url_dict_dir = next(args)
+    except StopIteration:
+        print ("Not enough arguments")
+        exit(1)
+
+    try:
+        #optional arguments
+        output_zip = next(args)
+    except StopIteration:
+        res=main(key_name, dest_folder, url_dict_dir)
     else:
-        res=main(data_name, dest_folder)
+        if output_zip == 'z':
+            res=main(key_name, dest_folder, url_dict_dir, False)
+        else:
+            res=main(key_name, dest_folder, url_dict_dir)
 
     raise SystemExit(res)

@@ -68,14 +68,19 @@ def dict_diff(dict_old, dict_new):
 if __name__ == "__main__":
 	new_path = sys.argv[1]
 	tmp_path = sys.argv[2]
+	commit_id = sys.argv[3]
+
+	commit_path = os.path.join(tmp_path, commit_id)
+	os.mkdir(commit_path)
 
 	urls_new = get_dict_urls(new_path)
-	with open('/home/saulo/Work/exmakhina/poly/workspace/tmp/urls.pickle', 'wb') as fout:
+	with open(os.path.join(commit_path,'urls.pickle'), 'wb') as fout:
 		pickle.dump(urls_new, fout, protocol=pickle.HIGHEST_PROTOCOL)
 	urls_old = get_dict_urls(os.path.join(tmp_path, 'sct_download_data.py'))
 
 	add, rm = dict_diff(urls_old, urls_new)
 
+	#TODO: commit_path instead of tmp_path
 	with open(os.path.join(tmp_path, 'keys_rm.txt'), 'w') as fout:
 		for k in rm:
 			fout.write(k+"\n")

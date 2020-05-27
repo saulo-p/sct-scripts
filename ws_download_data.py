@@ -110,7 +110,7 @@ def unzip(compressed, dest_folder):
         raise
 
 
-def install_data(url, dest_folder, unzip=True):
+def install_data(url, dest_folder, do_unzip=True):
     """
     Download data from a URL and install in the appropriate folder. Deals with multiple mirrors, retry download,
     check if data already exist.
@@ -121,8 +121,9 @@ def install_data(url, dest_folder, unzip=True):
 
     # Download data
     tmp_file = download_data(url)
-    if not unzip:
-        shutil.copyfile(tmp_file, dest_folder)
+
+    if not do_unzip:
+        shutil.copyfile(tmp_file, os.path.join(dest_folder,os.path.basename(tmp_file)))
         return
 
     # unzip

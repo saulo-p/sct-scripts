@@ -30,11 +30,13 @@ do
 	while read KEY;
 	do
 		mkdir $REPO_PATH/$KEY -p
-		$WS_PATH/ws_sct_download_data.py $KEY $REPO_PATH/$KEY
+		$WS_PATH/ws_sct_download_data.py $KEY $REPO_PATH/$KEY $WS_PATH/tmp/$SHA
 	done < $WS_PATH/tmp/keys_add.txt
 
 	# clear tmp lists before next iteration
 	rm $WS_PATH/tmp/*
+	#TODO: after changing keys_add and keys_rm to commit folder, rm only sct_download_data from tmp (if cp overwrites just remove line)
+	rm -r $WS_PATH/tmp/*
 	# copy current download script to tmp
 	cp $SCT_DOWN_PATH $WS_PATH/tmp
 
