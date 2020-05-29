@@ -29,7 +29,7 @@ do
 	while read KEY;
 	do
 		mkdir $REPO_PATH/$KEY -p
-		$WS_PATH/ws_sct_download_data.py $KEY $REPO_PATH/$KEY $WS_PATH/tmp/$SHA
+		$WS_PATH/sct_download_data.py $KEY $REPO_PATH/$KEY $WS_PATH/tmp/$SHA
 	done < $WS_PATH/tmp/$SHA/keys_add.txt
 
 	# clear tmp lists before next iteration

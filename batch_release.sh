@@ -26,7 +26,7 @@ do
 	commit_body=$(git log -1 $TAG --pretty="%b")
 	SHA=${commit_body:106:8} # extract the commit id from the auto-generated message
 	mkdir -p $OUTPUT/$TAG
-	$WS_PATH/ws_sct_download_data.py $DATASET $OUTPUT/$TAG $OUTPUT/$SHA z
+	$WS_PATH/sct_download_data.py $DATASET $OUTPUT/$TAG $OUTPUT/$SHA z
 
 	filename=$(ls $OUTPUT/$TAG)
 	mv $OUTPUT/$TAG/$filename $REPO_PATH
