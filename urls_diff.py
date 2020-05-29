@@ -80,10 +80,9 @@ if __name__ == "__main__":
 
 	add, rm = dict_diff(urls_old, urls_new)
 
-	#TODO: commit_path instead of tmp_path
-	with open(os.path.join(tmp_path, 'keys_rm.txt'), 'w') as fout:
+	with open(os.path.join(commit_path, 'keys_rm.txt'), 'w') as fout:
 		for k in rm:
 			fout.write(k+"\n")
-	with open(os.path.join(tmp_path, 'keys_add.txt'), 'w') as fout:
+	with open(os.path.join(commit_path, 'keys_add.txt'), 'w') as fout:
 		for k in add:
 			fout.write(k+"\n")
