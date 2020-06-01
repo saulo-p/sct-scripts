@@ -14,10 +14,9 @@ git checkout master
 while read SHA;
 do
 	git checkout -q $SHA
-	#TODO: remove ./ from SCT_DOWN_PATH
 	SCT_DOWN_PATH=$(find ./ -name sct_download_data.py)
 	COMMIT_MSG_TITLE=$(git log -1 --pretty="%cd: %s" --date short)
-	COMMIT_MSG_BODY=$(git log -1 --pretty="Data retrieved automatically from download urls in https://github.com/neuropoly/spinalcordtoolbox/commit/%h/${SCT_DOWN_PATH}")
+	COMMIT_MSG_BODY=$(git log -1 --pretty="Data retrieved automatically from download urls in https://github.com/neuropoly/spinalcordtoolbox/commit/%h/${SCT_DOWN_PATH:2}")
 
 	# create url diff lists
 	$WS_PATH/urls_diff.py $SCT_PATH/$SCT_DOWN_PATH $WS_PATH/tmp $SHA
