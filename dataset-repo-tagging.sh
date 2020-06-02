@@ -1,27 +1,27 @@
 #!/bin/bash
 WS_PATH=/home/saulo/Work/exmakhina/poly/workspace
 SCT_PATH=/home/saulo/Work/exmakhina/poly/sct
-REPO_PATH=/home/saulo/Work/exmakhina/poly/SCT-data
+DATASET_REPO_PATH=/home/saulo/Work/exmakhina/poly/SCT-data
 
-rm $WS_PATH/tmp/*
+TMP_DIR=$WS_PATH/tmp/
+mkdir -p $TMP_DIR
+rm -r -f $TMP_DIR/*
 
-#### list sct repo tags
-tags_file=$WS_PATH/tmp/tag_sorted.txt
+
 cd $SCT_PATH
 git checkout master
 
+#### list sct repo tags: sort (date,tag) pairs based on date
+tags_file=$TMP_DIR/tag_sorted.txt
 while read TAG;
 do
 	DATE=$(git log -1 --format=%cd --date=short $TAG)
-	echo "${DATE} ${TAG}" >> $WS_PATH/tmp/tag_dated.txt
+	echo "${DATE} ${TAG}" >> $TMP_DIR/tag_dated.txt
 done < <(git tag)
-
-#sort tags based on date
-sort -r $WS_PATH/tmp/tag_dated.txt > $tags_file
+sort -r $TMP_DIR/tag_dated.txt > $tags_file
 
 #### apply sct tags to corresponding data commits
-cd $REPO_PATH
-
+cd $DATASET_REPO_PATH
 while read SHA;
 do
 	commit_msg=$(git log -1 $SHA --pretty="%s")
