@@ -1,5 +1,6 @@
 import argparse
 import argparse, json, os
+import argparse, json, io, os
 import logging
 import urllib.request, urllib.error
 
@@ -36,9 +37,28 @@ def download_default_release_asset(target_repo, release_id):
 	'''Download the default asset of a given release'''
 	pass
 
-def upload_github_asset(target_repo, release_id):
-	'''Upload provided artifact as release asset'''
-	pass
+def upload_github_asset(target_repo, release_id, asset_path):
+	'''
+	Uploads a release asset to a target release.
+	'''
+	logger.info("Uploading release asset")
+
+	url = "https://uploads.github.com/repos/sct-data/{}/releases/{}/assets?name={}" \
+		.format(target_repo, release_id, asset_path)
+	headers = {
+		"Authorization": "token {}".format(GH_TOKEN),
+		"Content-Type": "application/octet-stream",
+	}
+
+	with io.open(asset_path, "rb") as fin:
+		payload = fin.read()
+	req = urllib.request.Request(url, headers=headers, method="POST", data=payload)
+	with urllib.request.urlopen(req) as resp:
+		if resp.getcode() != 201:
+			raise RuntimeError("Bad response: %d / %s", resp.getcode(), resp.read())
+		ret = json.loads(resp.read().decode('utf-8'))
+		logger.info("ret: %s", ret)
+
 
 def upload_to_osf():
 	'''
