@@ -26,7 +26,7 @@ def create_release(target_repo, target_tag):
 
 	with urllib.request.urlopen(req) as resp:
 		if resp.getcode() != 201:
-			raise RuntimeError("Bad response: %d / %s", resp.getcode(), resp.read())
+			raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
 		ret = json.loads(resp.read().decode('utf-8'))
 		logger.info("ret: %s", ret)
 		release_id = ret["id"]
@@ -35,7 +35,31 @@ def create_release(target_repo, target_tag):
 
 def download_default_release_asset(target_repo, release_id):
 	'''Download the default asset of a given release'''
-	pass
+	from tqdm import tqdm
+	logger.info("Downloading release default asset")
+
+	url = "https://api.github.com/repos/sct-data/{}/releases/{}".format(target_repo, release_id)
+	headers = {
+		"Authorization": "token {}".format(GH_TOKEN),
+		"Content-Type": "application/octet-stream",
+	}
+
+	class TqdmUpTo(tqdm):
+		def update_to(self, num_blocks, block_size, total_size):
+			if total_size is not None and self.total is None:
+				self.total = total_size
+			self.update(num_blocks * block_size - self.n)  # will also set self.n = b * bsize
+
+	req = urllib.request.Request(url, headers=headers, method="GET")
+	with urllib.request.urlopen(req) as resp:
+		if resp.getcode() != 200:
+			raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
+		ret = json.loads(resp.read().decode('utf-8'))
+		logger.info("ret: %s", ret)
+
+		with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc='Downloading') as t:
+			urllib.request.urlretrieve(ret['zipball_url'], ret['tag_name']+'.zip', t.update_to)
+			t.total = t.n
 
 def upload_github_asset(target_repo, release_id, asset_path):
 	'''
@@ -55,10 +79,9 @@ def upload_github_asset(target_repo, release_id, asset_path):
 	req = urllib.request.Request(url, headers=headers, method="POST", data=payload)
 	with urllib.request.urlopen(req) as resp:
 		if resp.getcode() != 201:
-			raise RuntimeError("Bad response: %d / %s", resp.getcode(), resp.read())
+			raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
 		ret = json.loads(resp.read().decode('utf-8'))
 		logger.info("ret: %s", ret)
-
 
 def upload_to_osf():
 	'''
