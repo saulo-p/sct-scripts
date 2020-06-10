@@ -1,5 +1,3 @@
-import argparse
-import argparse, json, os
 import argparse, json, io, os
 import logging
 import urllib.request, urllib.error
@@ -83,10 +81,23 @@ def upload_github_asset(target_repo, release_id, asset_path):
 		ret = json.loads(resp.read().decode('utf-8'))
 		logger.info("ret: %s", ret)
 
-def upload_to_osf():
+def upload_to_osf(osf_project, asset_path):
 	'''
-	Uploads new version of the data to the Open Science Framework
-	:return: osf new url (?)
+	Uploads new version of the data to the Open Science Framework.
+	:return: osf url of the newly uploaded asset.
+	'''
+	import subprocess
+	try:
+		os.environ['OSF_USERNAME']
+		os.environ['OSF_PASSWORD']
+	except:
+		print("Please provide OSF environment variables")
+		raise SystemExit()
+
+	cmd = ['osf', '-u', os.environ['OSF_USERNAME'], '-p', osf_project, 'upload', asset_path, 'data/'+asset_path]
+	subprocess.run(cmd)
+	return
+
 	'''
 	pass
 
