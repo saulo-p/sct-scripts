@@ -101,12 +101,24 @@ def upload_to_osf(osf_project_id, osf_username, osf_password, asset_path, upload
 				if file.path == upload_path:
 					return file._download_url
 
-def update_release_(target_repo, release_id, osf_url):
+def update_release_with_osf_url(target_repo, release_id, gh_token, osf_url):
 	'''
-	Include link to osf data in the github release
+	Include osf download url (in case osf upload was performed) to the Github release
 	'''
-	pass
+	url = "https://api.github.com/repos/sct-data/{}/releases/{}".format(target_repo, release_id)
+	headers = {
+		"Authorization": "token {}".format(gh_token),
+		"Content-Type": "application/json",
+	}
 
+	payload = json.dumps({"body": "Asset also available at {}".format(osf_url)}).encode("utf-8")
+	req = urllib.request.Request(url, headers=headers, method="PATCH", data=payload)
+
+	with urllib.request.urlopen(req) as resp:
+		if resp.getcode() != 200:
+			raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
+		ret = json.loads(resp.read().decode('utf-8'))
+		logger.info("ret: %s", ret)
 
 
 def main(args_in=None):
