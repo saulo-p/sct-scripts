@@ -110,6 +110,43 @@ def update_release_(target_repo, release_id, osf_url):
 
 
 def main(args_in=None):
+	def list_org_repos():
+		url = "https://api.github.com/orgs/sct-data/repos"
+		headers = {
+			"Content-Type": "application/json",
+		}
+		req = urllib.request.Request(url, headers=headers, method="GET")
+
+		with urllib.request.urlopen(req) as resp:
+			if resp.getcode() != 200:
+				raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
+			ret = json.loads(resp.read().decode('utf-8'))
+			logger.info("ret: %s", ret)
+
+			sct_data_repos = list()
+			for repo in ret:
+				sct_data_repos.append(repo['name'])
+
+		return sct_data_repos
+
+	def list_repo_tags(repo):
+		url = "https://api.github.com/repos/sct-data/{}/tags".format(repo)
+		headers = {
+			"Content-Type": "application/json",
+		}
+		req = urllib.request.Request(url, headers=headers, method="GET")
+
+		with urllib.request.urlopen(req) as resp:
+			if resp.getcode() != 200:
+				raise RuntimeError("Bad response: {} / {}".format(resp.getcode(), resp.read()))
+			ret = json.loads(resp.read().decode('utf-8'))
+			logger.info("ret: %s", ret)
+
+			tags = list()
+			for tag in ret:
+				tags.append(tag['name'])
+
+		return tags
 
 	def parse_args():
 		parser = argparse.ArgumentParser(
@@ -140,11 +177,11 @@ def main(args_in=None):
 
 		args = parser.parse_args(args=args_in)
 
-		sct_data_repos = ['sct_testing_data', 'sct_example_data', 'deepseg_lesion_models', 'deepseg_sc_models', 'deepseg_gm_models', 'pmj_models', 'optic_models', 'c2c3_disc_models', 'MNI-Poly-AMU', 'PAM50'] # list_org_repos()
-		if args.repository not in sct_data_repos:
+		if args.repository not in list_org_repos():
 			parser.error("{} is not a valid sct-data repository.".format(args.repository))
 
-		#TODO (maybe): validate tag
+		if args.tag not in list_repo_tags(args.repository):
+			parser.error("{} is not a valid tag of sct-data/{}.".format(args.tag, args.repository))
 
 		if args.github_token is None:
 			try:
