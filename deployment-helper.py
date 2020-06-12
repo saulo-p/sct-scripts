@@ -27,8 +27,11 @@ def create_release(target_repo, target_tag, gh_token):
 
 	return release_id
 
-def download_default_release_asset(target_repo, release_id, gh_token):
-	'''Download the default asset of a given release'''
+def download_default_release_asset(target_repo, release_id, gh_token, target_dir):
+	'''
+	Download the default asset of a given release
+	:return: relative path to downloaded file.
+	'''
 	from tqdm import tqdm
 	logger.info("Downloading release default asset")
 
@@ -51,9 +54,12 @@ def download_default_release_asset(target_repo, release_id, gh_token):
 		ret = json.loads(resp.read().decode('utf-8'))
 		logger.info("ret: %s", ret)
 
+		downloaded_asset_path = os.path.join(target_dir, ret['tag_name']+'.zip')
 		with TqdmUpTo(unit='B', unit_scale=True, unit_divisor=1024, miniters=1, desc='Downloading') as t:
-			urllib.request.urlretrieve(ret['zipball_url'], ret['tag_name']+'.zip', t.update_to)
+			urllib.request.urlretrieve(ret['zipball_url'], downloaded_asset_path, reporthook=t.update_to)
 			t.total = t.n
+
+	return downloaded_asset_path
 
 def upload_github_asset(target_repo, release_id, asset_path, gh_token):
 	'''
